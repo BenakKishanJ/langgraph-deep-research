@@ -58,8 +58,8 @@ Tests use `pytest` with a fake model and `TestClient`; no network calls.
 The deep research graph extends the agent with a planner node that breaks
 a topic into sub-queries, a fan-out that runs a search node for each
 sub-query, a reflection node that critiques the collected evidence and
-suggests follow-up searches, and a brief node that produces a cited
-markdown report. A rounds budget bounds the number of reflection loops.
+suggests follow-up searches, and a synthesis/brief node that produces a
+cited markdown report. A rounds budget bounds the number of reflection loops.
 
 ### State
 
@@ -94,6 +94,14 @@ markdown report. A rounds budget bounds the number of reflection loops.
 
 The graph is compiled by `build_deep_research_graph()` (exposed as
 `deep_research_graph` when used).
+
+## Report Synthesis
+
+`brief.py` exposes `build_brief(evidence)`, which turns the accumulated
+evidence into a structured markdown report. The report has a Findings
+section (each finding cites a source as `[N]`) and a numbered Bibliography
+section listing each source's title and URL. Empty evidence yields a
+"No sources found" report.
 
 ## Reflection and Refinement
 

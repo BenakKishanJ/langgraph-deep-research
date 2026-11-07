@@ -7,3 +7,4 @@
 | `part-2` | search-tool-and-loop | Search Tool and Loop |
 | `part-3` | plan-and-fan-out | Plan and Fan-Out |
 | `part-4` | reflection-and-refinement | Reflection and Refinement |
+| `part-5` | report-and-tests | Report and Tests |
