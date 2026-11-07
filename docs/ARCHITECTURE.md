@@ -9,6 +9,14 @@ is a FastAPI app that exposes `/api/ask` and serves a minimal HTML page.
 ## State
 
 `State` is a `TypedDict` with a single `messages` channel (list of
+`BaseMessage`). The channel uses the `operator.add` accumulator reducer:
+without it, LangGraph channels are last-write-wins and each node return
+would wipe the previous messages, breaking the ask/tool loop. Messages
+accumulate across the loop: the agent appends its reply (which may carry
+tool calls), the tool node appends the tool results, and the agent appends
+the final answer.
+
+`State` is a `TypedDict` with a single `messages` channel (list of
 `BaseMessage`). Messages accumulate across the loop: the agent appends
 its reply (which may carry tool calls), the tool node appends the tool
 results, and the agent appends the final answer.
