@@ -33,3 +33,18 @@ def web_search(query: Annotated[str, "The search query to run."]) -> str:
             f"Content: {item.get('content', '')}"
         )
     return "\n\n".join(blocks)
+
+
+def web_search_results(query: str) -> list[dict[str, str]]:
+    """Return structured search results: list of {url, title, snippet}."""
+    client = _client()
+    response = client.search(query, max_results=5, search_depth="basic")
+    results = response.get("results", [])
+    return [
+        {
+            "url": item.get("url", ""),
+            "title": item.get("title", ""),
+            "snippet": item.get("content", ""),
+        }
+        for item in results
+    ]

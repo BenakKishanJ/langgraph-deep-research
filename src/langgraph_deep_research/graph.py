@@ -8,6 +8,7 @@ from langchain_core.messages import AIMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from langgraph.prebuilt import ToolNode
+from langgraph.types import Send
 
 from .config import load_settings
 from .tools import web_search
@@ -64,6 +65,44 @@ def build_graph():
         "agent", should_continue, {"tools": "tools", "end": END}
     )
     g.add_edge("tools", "agent")
+    return g.compile()
+
+
+# --- Deep research graph nodes ---
+
+def search_node(state: dict) -> dict:
+    """Run a single web search and return evidence entries."""
+    from .tools import web_search_results
+
+    results = web_search_results(state["query"])
+    return {"evidence": results}
+
+
+def brief_node(state: DeepResearchState) -> dict:
+    """Produce a markdown brief with numbered citations from evidence."""
+    from .brief import build_brief
+
+    brief = build_brief(state["evidence"])
+    return {"brief": brief, "messages": [AIMessage(content=brief)]}
+
+
+def fan_out_node(state: DeepResearchState) -> list:
+    """Fan out to a search node for each sub-query."""
+    return [Send("search", {"query": q}) for q in state["sub_queries"]]
+
+
+def build_deep_research_graph():
+    """Compile the planner → fan-out → search → brief graph."""
+    from .planner import planner_node
+
+    g = StateGraph(DeepResearchState)
+    g.add_node("planner", planner_node)
+    g.add_node("fan_out", fan_out_node)
+    g.add_node("search", search_node)
+    g.add_node("brief", brief_node)
+    g.set_entry_point("planner")
+    g.add_edge("planner", "fan_out")
+    g.add_edge("fan_out", "brief")
     return g.compile()
 
 
