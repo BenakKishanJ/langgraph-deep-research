@@ -1,7 +1,8 @@
 """Agent graph with an ask/tool loop backed by Tavily search."""
 from __future__ import annotations
 
-from typing import TypedDict
+import operator
+from typing import Annotated, TypedDict
 
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
@@ -12,6 +13,10 @@ from .tools import web_search
 
 
 class State(TypedDict):
+    # LangGraph channels without a reducer are last-write-wins: a plain
+    # list would be replaced on every node return, so the ask/tool loop
+    # would lose the user question and tool results. operator.add makes the
+    # messages channel accumulate across nodes.
     messages: list
 
 
