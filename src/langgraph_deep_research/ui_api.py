@@ -1,11 +1,10 @@
-"""Adapter the UI calls; invokes the graph."""
+"""Adapter the UI calls; invokes the deep research graph."""
 from __future__ import annotations
 
-from .graph import graph
+from .graph import build_deep_research_graph
 
 
 def ask(question: str) -> str:
-    """Run the graph on a single user message and return the assistant reply."""
-    result = graph.invoke({"messages": [("user", question)]})
-    return result["messages"][-1].content
-
+    """Run the deep research graph and return the cited markdown brief."""
+    result = build_deep_research_graph().invoke({"messages": [("user", question)]})
+    return result["brief"]

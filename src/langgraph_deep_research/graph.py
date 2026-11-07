@@ -86,8 +86,18 @@ def brief_node(state: DeepResearchState) -> dict:
     return {"brief": brief, "messages": [AIMessage(content=brief)]}
 
 
-def fan_out_node(state: DeepResearchState) -> list:
-    """Fan out to a search node for each sub-query."""
+def fan_out_node(state: DeepResearchState) -> dict:
+    """Join node between planning and searching.
+
+    Returns a dict (nodes return dicts); the actual fan-out happens in the
+    conditional edge registered on this node, whose router returns one
+    ``Send`` per sub-query. Send may NOT be returned by a node itself.
+    """
+    return {}
+
+
+def fan_out_router(state: DeepResearchState) -> list:
+    """Return one ``Send`` per sub-query: a search run starts for each one."""
     return [Send("search", {"query": q}) for q in state["sub_queries"]]
 
 
@@ -102,7 +112,12 @@ def build_deep_research_graph():
     g.add_node("brief", brief_node)
     g.set_entry_point("planner")
     g.add_edge("planner", "fan_out")
-    g.add_edge("fan_out", "brief")
+    # no path map: the router returns Send objects, so LangGraph starts one
+    # search invocation per Send and then joins the parallel branches.
+    g.add_conditional_edges("fan_out", fan_out_router)
+    # every search invocation ends at the brief, so the brief runs exactly
+    # once, after all parallel searches have finished.
+    g.add_edge("search", "brief")
     return g.compile()
 
 

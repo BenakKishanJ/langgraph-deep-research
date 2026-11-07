@@ -78,20 +78,30 @@ def test_agent_answers_without_tool_when_no_tool_call(monkeypatch):
     assert result["messages"][-1].content == "direct answer"
 
 
-def test_ui_api_ask_runs_graph(monkeypatch):
-    """ui_api.ask invokes the graph and returns the last message content."""
+def test_ui_api_ask_returns_cited_brief(monkeypatch):
+    """ui_api.ask runs the deep research graph and returns the brief."""
 
     class FakeModel:
         def invoke(self, messages):
-            return AIMessage(content="answer from graph")
+            return AIMessage(content="fake query")
 
-        def bind_tools(self, tools):
-            return self
+    class FakeClient:
+        def search(self, query, max_results=5, search_depth="basic"):
+            return {"results": [
+                {"title": f"Result for {query}",
+                 "url": "https://example.com/x",
+                 "content": "fake content"},
+            ]}
 
     monkeypatch.setattr(
         "langgraph_deep_research.graph._default_model", lambda: FakeModel()
     )
+    monkeypatch.setattr(
+        "langgraph_deep_research.tools._client", lambda: FakeClient()
+    )
 
     from langgraph_deep_research.ui_api import ask
 
-    assert ask("hello") == "answer from graph"
+    brief = ask("hello")
+    assert brief.startswith("[1]")
+    assert "Result for fake query" in brief
