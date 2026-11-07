@@ -1,20 +1,37 @@
 # Architecture
 
-The project is a deep research agent built with LangGraph. It uses a single
-StateGraph node that calls an OpenRouter chat model. The UI is a FastAPI app
-that exposes `/api/ask` and serves a minimal HTML page.
+The project is a deep research agent built with LangGraph. It uses an
+agent node that calls an OpenRouter chat model with a Tavily search tool
+bound to it, a ToolNode that runs the tool, and a conditional edge that
+loops back to the agent while the model keeps issuing tool calls. The UI
+is a FastAPI app that exposes `/api/ask` and serves a minimal HTML page.
 
 ## State
 
 `State` is a `TypedDict` with a single `messages` channel (list of
-`BaseMessage`). The reducer is the default last-write-wins.
+`BaseMessage`). Messages accumulate across the loop: the agent appends
+its reply (which may carry tool calls), the tool node appends the tool
+results, and the agent appends the final answer.
 
 ## Graph
 
-- `answer_node` — calls the model with the user messages and appends the
-  assistant reply.
+- `agent_node` — calls the model with the user messages and the
+  `web_search` tool bound to it; appends the assistant reply (which may
+  contain tool calls).
+- `tools` — a `ToolNode` that runs `web_search` for every tool call the
+  model issued and appends the results as `ToolMessage`s.
+- `should_continue` — a conditional edge from `agent` that routes back to
+  `tools` while the last message has tool calls, or ends the run when the
+  model gives a final answer.
 
 The graph is compiled in `graph.py` and exposed as `graph`.
+
+## Tools
+
+`tools.py` wraps Tavily search as a LangChain `@tool` called
+`web_search`. It builds a `TavilyClient` from `TAVILY_API_KEY` (via
+`config.load_settings()`), runs a basic search, and returns formatted
+title/URL/content blocks.
 
 ## Configuration
 
