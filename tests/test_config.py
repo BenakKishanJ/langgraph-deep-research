@@ -13,7 +13,7 @@ def test_defaults_when_no_env(monkeypatch):
     s = load_settings()
     assert s.openrouter_api_key == ""
     assert s.tavily_api_key == ""
-    assert s.model == "openai/gpt-oss-20b"
+    assert s.model == "nvidia/nemotron-3.5-lightning:free"
 
 
 def test_env_var_overrides_default(monkeypatch):

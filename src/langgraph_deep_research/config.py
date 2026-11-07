@@ -27,5 +27,5 @@ def load_settings() -> Settings:
             "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"
         ),
         tavily_api_key=os.getenv("TAVILY_API_KEY", ""),
-        model=os.getenv("DEFAULT_MODEL", "openai/gpt-oss-20b"),
+        model=os.getenv("DEFAULT_MODEL", "nvidia/nemotron-3.5-lightning:free"),
     )
