@@ -34,7 +34,8 @@ The graph is compiled in `graph.py` and exposed as `graph`.
 `tools.py` wraps Tavily search as a LangChain `@tool` called
 `web_search`. It builds a `TavilyClient` from `TAVILY_API_KEY` (via
 `config.load_settings()`), runs a basic search, and returns formatted
-title/URL/content blocks.
+title/URL/content blocks. A structured helper `web_search_results` returns
+a list of `{url, title, snippet}` dicts for the deep research graph.
 
 ## Configuration
 
@@ -51,3 +52,33 @@ environment variables take precedence.
 ## Testing
 
 Tests use `pytest` with a fake model and `TestClient`; no network calls.
+
+## Deep Research Graph
+
+The deep research graph extends the agent with a planner node that breaks
+a topic into sub-queries, a fan-out that runs a search node for each
+sub-query, and a brief node that produces a cited markdown report.
+
+### State
+
+`DeepResearchState` adds three channels to `State`:
+
+- `sub_queries` — a list of strings produced by the planner.
+- `evidence` — an `Annotated[list[dict[str, str]], operator.add]` channel
+  that accumulates `{url, title, snippet}` entries from every search node.
+  The `operator.add` reducer appends each search's results so the brief
+  node sees all sources.
+- `brief` — the final markdown string.
+
+### Graph
+
+- `planner_node` — calls the model with a planning prompt; returns the
+  sub-queries and an assistant message.
+- `fan_out_node` — returns a `Send` for each sub-query, invoking
+  `search_node` with `{"query": q}`.
+- `search_node` — runs `web_search_results` and returns evidence entries.
+- `brief_node` — calls `build_brief` from `brief.py` and writes the brief
+  and a final assistant message.
+
+The graph is compiled by `build_deep_research_graph()` (exposed as
+`deep_research_graph` when used).
