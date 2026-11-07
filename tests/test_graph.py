@@ -103,5 +103,6 @@ def test_ui_api_ask_returns_cited_brief(monkeypatch):
     from langgraph_deep_research.ui_api import ask
 
     brief = ask("hello")
-    assert brief.startswith("[1]")
-    assert "Result for fake query" in brief
+    assert brief.startswith("# Research Report")
+    assert "## Bibliography" in brief
+    assert "[1] Result for fake query - https://example.com/x" in brief
