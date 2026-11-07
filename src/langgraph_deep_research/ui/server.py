@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 
-from ..ui_api import ask
+from ..ui_api import ask, ask_stream
 
 app = FastAPI()
 
@@ -49,6 +49,13 @@ async def ask_endpoint(request: Request) -> dict:
     question = body.get("question", "")
     answer = ask(question)
     return {"answer": answer}
+
+
+@app.post("/api/ask-stream")
+async def ask_stream_endpoint(request: Request) -> StreamingResponse:
+    body = await request.json()
+    question = body.get("question", "")
+    return StreamingResponse(ask_stream(question), media_type="text/event-stream")
 
 
 def main() -> None:
