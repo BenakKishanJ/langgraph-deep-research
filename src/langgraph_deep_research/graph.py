@@ -17,7 +17,7 @@ class State(TypedDict):
     # list would be replaced on every node return, so the ask/tool loop
     # would lose the user question and tool results. operator.add makes the
     # messages channel accumulate across nodes.
-    messages: list
+    messages: Annotated[list, operator.add]
 
 
 def _default_model() -> ChatOpenAI:
