@@ -5,7 +5,13 @@ description = "A beginner course that builds a deep research agent with LangGrap
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "langgraph>=0.2",
+    "langchain-openai>=0.2",
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+    "python-dotenv>=1.0",
+]
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.11"]
