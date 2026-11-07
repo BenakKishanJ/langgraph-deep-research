@@ -16,11 +16,6 @@ accumulate across the loop: the agent appends its reply (which may carry
 tool calls), the tool node appends the tool results, and the agent appends
 the final answer.
 
-`State` is a `TypedDict` with a single `messages` channel (list of
-`BaseMessage`). Messages accumulate across the loop: the agent appends
-its reply (which may carry tool calls), the tool node appends the tool
-results, and the agent appends the final answer.
-
 ## Graph
 
 - `agent_node` — calls the model with the user messages and the
