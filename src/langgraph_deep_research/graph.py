@@ -23,10 +23,12 @@ class State(TypedDict):
 
 
 class DeepResearchState(TypedDict):
-    """State for the deep research graph: planner, fan-out, search, brief."""
+    """State for the deep research graph: planner, fan-out, search, reflection, brief."""
 
     messages: Annotated[list, operator.add]
     sub_queries: list[str]
+    follow_up_queries: list[str]
+    round: int
     evidence: Annotated[list[dict[str, str]], operator.add]
     brief: str
 
@@ -70,6 +72,7 @@ def build_graph():
 
 # --- Deep research graph nodes ---
 
+
 def search_node(state: dict) -> dict:
     """Run a single web search and return evidence entries."""
     from .tools import web_search_results
@@ -93,31 +96,40 @@ def fan_out_node(state: DeepResearchState) -> dict:
     conditional edge registered on this node, whose router returns one
     ``Send`` per sub-query. Send may NOT be returned by a node itself.
     """
-    return {}
+    # Reset follow-up queries so the next reflection starts fresh.
+    return {"follow_up_queries": []}
 
 
 def fan_out_router(state: DeepResearchState) -> list:
-    """Return one ``Send`` per sub-query: a search run starts for each one."""
-    return [Send("search", {"query": q}) for q in state["sub_queries"]]
+    """Return one ``Send`` per query: use follow-ups if present, else sub-queries."""
+    queries = state.get("follow_up_queries") or state.get("sub_queries", [])
+    return [Send("search", {"query": q}) for q in queries]
 
 
 def build_deep_research_graph():
-    """Compile the planner → fan-out → search → brief graph."""
+    """Compile planner → fan-out → search → reflection → (loop or brief)."""
     from .planner import planner_node
+    from .reflection import reflection_node, should_continue_reflection
 
     g = StateGraph(DeepResearchState)
     g.add_node("planner", planner_node)
     g.add_node("fan_out", fan_out_node)
     g.add_node("search", search_node)
+    g.add_node("reflection", reflection_node)
     g.add_node("brief", brief_node)
     g.set_entry_point("planner")
     g.add_edge("planner", "fan_out")
     # no path map: the router returns Send objects, so LangGraph starts one
     # search invocation per Send and then joins the parallel branches.
     g.add_conditional_edges("fan_out", fan_out_router)
-    # every search invocation ends at the brief, so the brief runs exactly
-    # once, after all parallel searches have finished.
-    g.add_edge("search", "brief")
+    # search results flow into reflection, which may loop back to fan_out
+    # or end at the brief.
+    g.add_edge("search", "reflection")
+    g.add_conditional_edges(
+        "reflection",
+        should_continue_reflection,
+        {"more": "fan_out", "end": "brief"},
+    )
     return g.compile()
 
 
