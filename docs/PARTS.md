@@ -6,3 +6,4 @@
 | `part-1` | setup-and-first-graph | Setup and First Graph |
 | `part-2` | search-tool-and-loop | Search Tool and Loop |
 | `part-3` | plan-and-fan-out | Plan and Fan-Out |
+| `part-4` | reflection-and-refinement | Reflection and Refinement |
