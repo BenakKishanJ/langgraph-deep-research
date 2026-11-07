@@ -19,4 +19,5 @@ def ask_stream(question: str):
         stream_mode="updates",
     ):
         for node, update in chunk.items():
-            yield f"event: {node}\ndata: {json.dumps(update)}\n\n"
+            # default=str: node updates may contain AIMessage objects
+            yield f"event: {node}\ndata: {json.dumps(update, default=str)}\n\n"

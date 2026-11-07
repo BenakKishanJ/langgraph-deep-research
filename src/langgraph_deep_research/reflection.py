@@ -7,8 +7,14 @@ from langchain_core.prompts import ChatPromptTemplate
 from . import graph as graph_module
 from .graph import DeepResearchState
 
+_REFLECT_SYSTEM = (
+    "You are a research referee. Review the following evidence and decide "
+    "whether more research is needed. If yes, suggest up to 3 follow-up "
+    "queries, each on a new line. If no more research is needed, respond "
+    "with an empty line."
+)
 _REFLECT_PROMPT = ChatPromptTemplate.from_messages([
-    ("system", "You are a research referee. Review the following evidence and decide whether more research is needed. If yes, suggest up to 3 follow-up queries, each on a new line. If no more research is needed, respond with an empty line."),
+    ("system", _REFLECT_SYSTEM),
     ("human", "{evidence}"),
 ])
 

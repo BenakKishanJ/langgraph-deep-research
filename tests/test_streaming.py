@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from langchain_core.messages import AIMessage
 
-from langgraph_deep_research.graph import build_deep_research_graph
 from langgraph_deep_research.ui.server import app
 
 
@@ -35,8 +34,9 @@ def test_ask_stream_endpoint_sends_events(monkeypatch):
                 ]
             }
 
+    fake_model = FakeModel()
     monkeypatch.setattr(
-        "langgraph_deep_research.graph._default_model", lambda: FakeModel()
+        "langgraph_deep_research.graph._default_model", lambda: fake_model
     )
     monkeypatch.setattr(
         "langgraph_deep_research.tools._client", lambda: FakeClient()

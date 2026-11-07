@@ -7,8 +7,13 @@ from langchain_core.prompts import ChatPromptTemplate
 from . import graph as graph_module
 from .graph import DeepResearchState
 
+_PLANNER_SYSTEM = (
+    "You are a research planner. Break the user's topic into 3-5 sub-queries "
+    "that cover the topic comprehensively. Return each sub-query on a new "
+    "line, with no numbering or extra text."
+)
 _PLANNER_PROMPT = ChatPromptTemplate.from_messages([
-    ("system", "You are a research planner. Break the user's topic into 3-5 sub-queries that cover the topic comprehensively. Return each sub-query on a new line, with no numbering or extra text."),
+    ("system", _PLANNER_SYSTEM),
     ("human", "{topic}"),
 ])
 

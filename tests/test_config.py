@@ -1,8 +1,6 @@
 """Tests for config.load_settings — offline, no network."""
 from __future__ import annotations
 
-import os
-
 from langgraph_deep_research.config import load_settings
 
 

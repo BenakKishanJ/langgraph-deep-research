@@ -161,8 +161,11 @@ def test_deep_research_graph_reflection_loop(monkeypatch):
                 ]
             }
 
+    # one shared instance: the count-based script must span planner and
+    # reflection calls; a fresh model per node would replay step 1 forever
+    fake_model = FakeModel()
     monkeypatch.setattr(
-        "langgraph_deep_research.graph._default_model", lambda: FakeModel()
+        "langgraph_deep_research.graph._default_model", lambda: fake_model
     )
     monkeypatch.setattr(
         "langgraph_deep_research.tools._client", lambda: FakeClient()

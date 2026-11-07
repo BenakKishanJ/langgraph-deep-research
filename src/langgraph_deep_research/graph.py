@@ -95,9 +95,13 @@ def fan_out_node(state: DeepResearchState) -> dict:
     Returns a dict (nodes return dicts); the actual fan-out happens in the
     conditional edge registered on this node, whose router returns one
     ``Send`` per sub-query. Send may NOT be returned by a node itself.
+
+    Returns an empty dict: this body runs BEFORE the router, so clearing
+    ``follow_up_queries`` here would wipe the queries the reflection node
+    just produced and make the loop re-search the original sub-queries.
+    Keeping follow-ups intact lets the router pick them per round.
     """
-    # Reset follow-up queries so the next reflection starts fresh.
-    return {"follow_up_queries": []}
+    return {}
 
 
 def fan_out_router(state: DeepResearchState) -> list:
