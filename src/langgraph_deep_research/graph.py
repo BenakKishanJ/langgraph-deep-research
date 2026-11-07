@@ -4,6 +4,7 @@ from __future__ import annotations
 import operator
 from typing import Annotated, TypedDict
 
+from langchain_core.messages import AIMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from langgraph.prebuilt import ToolNode
@@ -18,6 +19,15 @@ class State(TypedDict):
     # would lose the user question and tool results. operator.add makes the
     # messages channel accumulate across nodes.
     messages: Annotated[list, operator.add]
+
+
+class DeepResearchState(TypedDict):
+    """State for the deep research graph: planner, fan-out, search, brief."""
+
+    messages: Annotated[list, operator.add]
+    sub_queries: list[str]
+    evidence: Annotated[list[dict[str, str]], operator.add]
+    brief: str
 
 
 def _default_model() -> ChatOpenAI:
