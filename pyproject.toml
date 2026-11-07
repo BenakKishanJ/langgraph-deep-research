@@ -13,6 +13,9 @@ dependencies = [
     "python-dotenv>=1.0",
 ]
 
+[project.scripts]
+deep-research-ui = "langgraph_deep_research.ui.server:main"
+
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.11"]
 
