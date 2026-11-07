@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 
-from .ui_api import ask
+from ..ui_api import ask
 
 app = FastAPI()
 
